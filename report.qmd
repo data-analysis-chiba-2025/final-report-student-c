@@ -1,0 +1,141 @@
+---
+title: "Analysis of UFO Sightings: The relationship between visuality and number of reports"
+author: Student C
+date: 2025-07-31
+format: docx
+---
+
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+
+# Load packages
+library(tidyverse)
+```
+
+```{r}
+#| label: load the data
+#| echo: false
+#| message: false
+
+#Load the data(ufo_sightings, places, day_parts_map)
+
+ufo_sightings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2023/2023-06-20/ufo_sightings.csv')
+places <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2023/2023-06-20/places.csv')
+day_parts_map <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2023/2023-06-20/day_parts_map.csv')
+
+```
+
+## Introduction
+
+“The "UFO Sightings Redux" data set includes details on the 80,000 UFO sightings, such as the locations of the sightings, the reported shapes of the UFOs, and the duration of each event.
+
+The original data come from the National UFO Reporting Center website, https://nuforcorc.org/ndx/?id=shape. Jon Harmon cleaned the data set and enhanced it with additional information from "sunrise‑sunset.org”, https://sunrise-sunset.org.
+
+Since “UFO” has sometimes been regarded as a legend, research papers on it are scarce. However, a paper identified a relationship between visibility and the number of sightings. Based on this, the study suggested that the environments where it is easy for people to have chances to witness UFOs may affect the number of reported sightings. However, as the research revealed that open skies increased the number of reports, similarly, other things such as population density, regional differences in belief in UFOs, and the time of day that people use the internet were considered as factors, regardless of positive and negative factors.
+
+Here, I analyze the previous dataset to answer the following questions:
+
+-   Does the region affect the number of reports of UFO sightings?
+-   Is the number of reports and how UFOs appear influenced by time periods associated with human life patterns and habitations?
+
+I will visually examine the factors found in previous research.
+
+## Data visualization
+
+```{r}
+#mutate "places" and "ufo_sightings"
+#| echo: false
+
+places_2 <- places |>
+  select(
+    city, state, country_code, latitude, longitude, population, elevation_m) |>
+  unique()
+
+ufo_sightings2 <- ufo_sightings |>
+  left_join(places_2, by = join_by(city, state, country_code))
+ufo_sightings
+
+```
+
+```{r}
+#Figure 1
+#| echo: false
+ggplot(
+  ufo_sightings2,
+  aes(
+    x = latitude,
+    y = longitude,
+    color = shape
+  )
+) +
+  geom_point() +
+  scale_x_log10() +
+  labs(
+   title = "Figure 1-1",
+    subtitle = "Geospital visualization of UFO sightings: Colored by the shape of UFO",
+   y = "Longtitude",
+   x = "Latitude",
+   color = "Shape of UFO"
+  )
+```
+
+```{r}
+#Figure 1-2
+#| echo: false
+ggplot(
+  ufo_sightings2,
+  aes(
+    x = latitude,
+    y = longitude,
+    color = day_part
+  )
+) +
+  geom_point() +
+  scale_x_log10() +
+  labs(
+    title = "Figure 1-2",
+    subtitle = "Geospital visualization of UFO sightings: Colored by Time Period",
+   y = "Longtitude",
+   x = "Latitude",
+   color = "Time periods"
+  )
+```
+
+```{r}
+#Figure 2
+#| echo: false
+
+ ggplot(
+  ufo_sightings2,
+  aes(
+    x = population,
+    y = duration_seconds,
+    color = shape
+  )
+) +
+  geom_point() +
+  scale_y_log10() +
+  scale_x_log10()  +
+  labs(
+    title = "Figure 2",
+    subtitle = "Relationship between population and how UFO appears: Duration and shapes",
+   y = "Duration of the events",
+   x = "Population of the sighting places",
+   color = "UFO sightings grouped into Time periods"
+  )
+
+```
+
+## Discussion
+
+Figure 1 visually shows the latitude and longitude of reported UFO sightings. By plotting the data, you can observe the distribution of UFO reports in a way similar to viewing a map. Indeed, one of the possible reasons for the concentration of data in certain areas is that an organization in the U.S. collected the data, but as anticipated in the previous study, you can verify that there is a geographical bias in the locations reported. In addition, to see if there are regional features related to how UFOs appear, figure 1 is colored by the kinds of UFO shapes and the time periods of the events.  The figure 1-1 is colored by the shapes of the UFO. It is not unreasonable to interpret that in the western regions, sightings tend to shift toward shapes like rectangles and orbs, while in the eastern regions, they tend to shift toward spheres and triangles. On the other hand, the further west you look, the less data there is. Therefore, the reliability of this is doubtful. As for the figure 1-2, it is colored by the time period of the day of the event. It can be seen that sightings during nighttime or twilight hours have been widely seen across all regions. No significant regional bias was observed. Moreover, the large number of reports during dark hours appears to be universal across a wide area. The both two Figure 1 imply a possibility that the relationship between how UFOs appear and each region is weak or minimal.
+
+Figure 2 shows relationships between population and how UFOs appeared. I used population density as a measure of human activity and characteristics of each habitation. "Duration" of the sightings and "Shape" of UFOs represent "How UFO appeared". This indicates that all population sizes have no significant deviation from a particular "duration" range. It is true that some points of the orb, cone, and light show slight expansion, but it is unclear whether these have a significant difference in the graph. While a large population seems to lead to a higher chance of sightings, there isn't a significant relationship between the event duration and population. However, regarding the UFO shape and population, the pink dots, as "unknown" form a rectangular shape. It is interesting that most of them disappear near the 1e+04 range compared to other points. There is no UFO shape that appears targeting areas with larger populations. Higher populations do not necessarily make UFO shapes easier to report. While there are some features in the plot concerning the UFO shape and population, the relationship between them is not clearly observed.
+
+In conclusion, the region affected the number of reports of UFO sightings as the figure 1-1 showed, and as for human life patterns and activity, the figure 1-2 showed that many UFOs are reported at dark period. According to figure 2, as for habitation, population does not have significant relationship with how UFOs are reported.
+
+## Reference
+
+R M Medina, S C Brewer, S M Kirpatrick(2023). "An environmental analysis of public UAP sightings and sky view potential".Scientific Report.13(1):.doi.10.1038/s41598-023-49527-x
